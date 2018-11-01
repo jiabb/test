@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bj.park.modules.park.dao.ParkOrderDao">
+    
+	<sql id="parkOrderColumns">
+		a.id AS "id",
+		a.user_id AS "user.id",
+		a.img_url AS "imgUrl",
+		a.start_time AS "startTime",
+		a.end_time AS "endTime",
+		a.park_time AS "parkTime",
+		a.address AS "address",
+		a.prepay AS "prepay",
+		a.free_time AS "freeTime",
+		a.price AS "price",
+		a.price_time AS "priceTime",
+		a.park_pay AS "parkPay",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.stop_flag AS "stopFlag",
+		u2.name AS "user.name"
+	</sql>
+	
+	<sql id="parkOrderJoins">
+		LEFT JOIN sys_user u2 ON u2.id = a.user_id
+	</sql>
+    
+	<select id="get" resultType="ParkOrder">
+		SELECT 
+			<include refid="parkOrderColumns"/>
+		FROM park_order a
+		<include refid="parkOrderJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ParkOrder">
+		SELECT
+			a.id AS "id",
+			a.user_id AS "user.id",
+			a.img_url AS "imgUrl",
+			a.start_time AS "startTime",
+			a.end_time AS "endTime",
+		    TIMESTAMPDIFF(SECOND ,a.start_time,SYSDATE()) AS "parkTime",
+			a.address AS "address",
+			a.prepay AS "prepay",
+			a.free_time AS "freeTime",
+			a.price AS "price",
+			a.price_time AS "priceTime",
+			a.park_pay AS "parkPay",
+			a.create_by AS "createBy.id",
+			a.create_date AS "createDate",
+			a.update_by AS "updateBy.id",
+			a.update_date AS "updateDate",
+			a.remarks AS "remarks",
+			a.del_flag AS "delFlag",
+			a.stop_flag AS "stopFlag",
+			u2.name AS "user.name"
+		FROM park_order a
+		<include refid="parkOrderJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="user != null and user.id != null and user.id != ''">
+				AND a.user_id = #{user.id}
+			</if>
+			<if test="loginName != null and loginName != ''">
+				AND u2.login_name = #{loginName}
+			</if>
+			<if test="startTime != null and startTime != ''">
+				AND a.start_time = #{startTime}
+			</if>
+			<if test="endTime != null and endTime != ''">
+				AND a.end_time = #{endTime}
+			</if>
+			<if test="address != null and address != ''">
+				AND a.address LIKE 
+					<if test="dbName == 'oracle'">'%'||#{address}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{address}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{address},'%')</if>
+			</if>
+			<if test="stopFlag != null and stopFlag != ''">
+				AND a.stop_flag = #{stopFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findHistoryList" resultType="ParkOrder">
+		SELECT
+		a.id AS "id",
+		a.user_id AS "user.id",
+		a.img_url AS "imgUrl",
+		a.start_time AS "startTime",
+		a.end_time AS "endTime",
+		a.park_time AS "parkTime",
+		a.address AS "address",
+		a.prepay AS "prepay",
+		a.free_time AS "freeTime",
+		a.price AS "price",
+		a.price_time AS "priceTime",
+		a.park_pay AS "parkPay",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.stop_flag AS "stopFlag",
+		u2.name AS "user.name"
+		FROM park_order a
+		<include refid="parkOrderJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="user != null and user.id != null and user.id != ''">
+				AND a.user_id = #{user.id}
+			</if>
+			<if test="loginName != null and loginName != ''">
+				AND u2.login_name = #{loginName}
+			</if>
+			<if test="startTime != null and startTime != ''">
+				AND a.start_time = #{startTime}
+			</if>
+			<if test="endTime != null and endTime != ''">
+				AND a.end_time = #{endTime}
+			</if>
+			<if test="address != null and address != ''">
+				AND a.address LIKE
+				<if test="dbName == 'oracle'">'%'||#{address}||'%'</if>
+				<if test="dbName == 'mssql'">'%'+#{address}+'%'</if>
+				<if test="dbName == 'mysql'">concat('%',#{address},'%')</if>
+			</if>
+			<if test="stopFlag != null and stopFlag != ''">
+				AND a.stop_flag = #{stopFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="findAllList" resultType="ParkOrder">
+		SELECT 
+			<include refid="parkOrderColumns"/>
+		FROM park_order a
+		<include refid="parkOrderJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO park_order(
+			id,
+			user_id,
+			img_url,
+			start_time,
+			end_time,
+			park_time,
+			address,
+			prepay,
+			free_time,
+			price,
+			price_time,
+			park_pay,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			stop_flag
+		) VALUES (
+			#{id},
+			#{user.id},
+			#{imgUrl},
+			#{startTime},
+			#{endTime},
+			#{parkTime},
+			#{address},
+			#{prepay},
+			#{freeTime},
+			#{price},
+			#{priceTime},
+			#{parkPay},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{stopFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE park_order SET 	
+			user_id = #{user.id},
+			img_url = #{imgUrl},
+			start_time = #{startTime},
+			end_time = #{endTime},
+			park_time = #{parkTime},
+			price = #{price},
+			price_time = #{priceTime},
+			address = #{address},
+			prepay = #{prepay},
+			free_time = #{freeTime},
+			park_pay = #{parkPay},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			stop_flag = #{stopFlag},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE park_order SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>
